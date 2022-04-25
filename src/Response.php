@@ -1,5 +1,7 @@
 <?php
 
+namespace AgrandesR;
+
 class Response {
     private string $responseType = 'JSON'; //XML or JSON (¿More ideas?) HTML
     private array $allowedTypes = ['JSON'];
@@ -8,7 +10,7 @@ class Response {
     
     //region RESPONSE-BODY properties
     private bool $status;
-    private int $code;
+    private int $code=200;
     private string $msg;
     private array $data=[];
     private array $meta=[];
