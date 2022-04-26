@@ -50,34 +50,58 @@ class Response {
         $this->addError($msg);
     }
 
-    public function setPagination(int $actualPage, int $totalPage) : bool {
-        return false;
+    public function setPagination(int $actualPage, int $totalPages) : bool {
+        if($actualPage>$totalPages || $actualPage<0) return false;
+        $this->meta['pagination']=[
+            'page'=>$actualPage,
+            'pages'=>$totalPages
+        ];
+        return true;
     }
     
     public function show() : void {
         $this->code = $this->code ?? ($this->code % 2 == 0 || $this->code==0);
         
+        $response = [
+            "success"=> $this->status ?? ($this->code % 2 == 0 || $this->code==0), //Code errors are odd
+            "code"=>$this->code,
+            "data"=>$this->data,
+            "meta"=>$this->meta
+        ];
+        if(isset($this->msg) && !empty($this->msg)) $response['msg']=$this->msg;
+
         switch ($this->responseType){
             case 'JSON':
                 //region SET HEADERS
                     http_response_code($this->headerCode ?? 200);
+                    header('Content-Type: application/json');
                     foreach ($this->extraHeaders as $key => $value) {
                         header("$key: $value");
                     }
                 //endregion
                 
                 //region PRINT BODY
-                    $response = [
-                        "success"=> $this->status ?? ($this->code % 2 == 0 || $this->code==0), //Code errors are odd
-                        "code"=>$this->code,
-                        "data"=>$this->data,
-                        "meta"=>$this->meta
-                    ];
-                    if(isset($this->msg) && !empty($this->msg)) $response['msg']=$this->msg;
-                    echo json_encode($response);
                 //endregion
+                echo json_encode($response);
                 break;
-            }
+        }
+    }
+    public function showData() {
+        switch ($this->responseType){
+            case 'JSON':
+                //region SET HEADERS
+                    http_response_code($this->headerCode ?? 200);
+                    header('Content-Type: application/json');
+                    foreach ($this->extraHeaders as $key => $value) {
+                        header("$key: $value");
+                    }
+                //endregion
+                
+                //region PRINT BODY
+                //endregion
+                echo json_encode($this->data);
+                break;
+        }
     }
     ////E> RESPONSE OPERATIVE FUNCTIONS
     /////////////////////////////////////////////////////////////////////////////////////////////////////
